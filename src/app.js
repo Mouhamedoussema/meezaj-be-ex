@@ -18,12 +18,7 @@ connectDB().catch((err) => {
   process.exit(1);
 });
 
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:4200',
-    credentials: true,
-  })
-);
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 // Serve uploaded files from temp storage
