@@ -26,11 +26,22 @@ app.use(
 );
 app.use(express.json());
 
-// Serve uploaded files
-const uploadDir = process.env.UPLOAD_DIR
-  ? path.resolve(process.env.UPLOAD_DIR)
-  : path.join(process.cwd(), 'uploads');
-fs.mkdirSync(uploadDir, { recursive: true });
+// Serve uploaded files — fall back to /tmp/uploads on read-only filesystems (e.g. serverless)
+function resolveUploadDir() {
+  const preferred = process.env.UPLOAD_DIR
+    ? path.resolve(process.env.UPLOAD_DIR)
+    : path.join(process.cwd(), 'uploads');
+  try {
+    fs.mkdirSync(preferred, { recursive: true });
+    return preferred;
+  } catch {
+    const fallback = path.join(require('os').tmpdir(), 'uploads');
+    fs.mkdirSync(fallback, { recursive: true });
+    console.warn(`Upload dir ${preferred} not writable, using ${fallback}`);
+    return fallback;
+  }
+}
+const uploadDir = resolveUploadDir();
 app.use('/uploads', express.static(uploadDir));
 
 app.use('/api/auth', authRoutes);
