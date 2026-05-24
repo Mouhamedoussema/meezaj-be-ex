@@ -1,8 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -26,11 +24,6 @@ app.use(cors({
 app.options('*', cors());
 app.use(express.json());
 
-// Serve uploaded files from temp storage
-const os = require('os');
-const uploadDir = path.join(os.tmpdir(), 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-app.use('/uploads', express.static(uploadDir));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
